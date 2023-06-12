@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
@@ -21,11 +22,12 @@ class RoleController extends Controller
         $validated = $request->validate(['name' => 'required|min:3']);
         Role::create($validated);
 
-        return to_route('admin.roles.index');
+        return to_route('admin.roles.index')->with('message','Role Created Successfully!!');
     }
 
     public function edit(Role $role){
-        return view('admin.roles.edit',compact('role'));
+        $permissions = Permission::all();
+        return view('admin.roles.edit',compact('role','permissions'));
     }
 
     public function update(Request $request, Role $role){
@@ -33,6 +35,31 @@ class RoleController extends Controller
         $role->update($validated);
 
         return to_route('admin.roles.index')->with('message','Role Updated Successfully!!');
+    }
+
+    public function destroy(Role $role){
+        $role->delete();
+
+        return to_route('admin.roles.index')->with('message','Role Deleted Successfully!!');
+
+    }
+
+    public function givePermission(Request $request, Role $role){
+        if($role->hasPermissionTo($request->permission)){
+            return back()->with('message','Permission Exists');
+        }
+        $role->givePermissionTo($request->permission);
+            return back()->with('message','Permission Added');
+
+    }
+
+    public function revokePermission(Role $role, Permission $permission){
+        if ($role->hasPermissionTo($permission)){
+            $role->revokePermissionTo($permission);
+
+            return back()->with('message','Permission Revoked');
+        }
+        return back()->with('message','Permission not Exists');
     }
 
 }

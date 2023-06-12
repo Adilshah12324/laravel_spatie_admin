@@ -20,8 +20,14 @@
                         <tr>
                             <td>{{$permission->name}}</td>
                             <td>
+{{--                                @role('!admin')--}}
                                 <a href="{{route('admin.permissions.edit',$permission->id)}}" class="btn btn-success btn-sm">Edit</a>
-                                <a href="" class="btn btn-danger btn-sm">Delete</a>
+{{--                                @endrole--}}
+                                <form method="POST" action="{{route('admin.permissions.destroy',$permission)}} " onsubmit="return confirm('Are you sure?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-danger btn-sm">Delete</button>
+                                </form>
                             </td>
                         </tr>
                     @endforeach
